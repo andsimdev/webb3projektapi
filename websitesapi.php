@@ -1,6 +1,6 @@
 <?php
 // Inkludera config-fil för att autoinkludera klasser
-include("$_SERVER[DOCUMENT_ROOT]/webbutveckling3/projekt/php/config.php");
+include("config.php");
 
 /*Headers med inställningar*/
 // Gör att webbtjänsten går att komma åt från alla domäner

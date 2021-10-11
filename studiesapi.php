@@ -1,6 +1,6 @@
 <?php
 // Inkludera config-fil för att autoinkludera klasser
-include("$_SERVER[DOCUMENT_ROOT]/webbutveckling3/projekt/php/config.php");
+include("config.php");
 
 /*Headers med inställningar*/
 // Gör att webbtjänsten går att komma åt från alla domäner
@@ -23,8 +23,8 @@ if (isset($_GET['id'])) {
     $id = $_GET['id'];
 }
 
-// Skapa instans av klassen Employment
-$emp = new Employment;
+// Skapa instans av klassen Study
+$study = new Study;
 
 // Kör olika case beroende på vilken anropsmetod som använts
 switch ($method) {
@@ -34,11 +34,11 @@ switch ($method) {
             // Säkerställ att medskickat id är numeriskt värde
             $id = intval($id);            
             // Anropa metoden för att hämta enskild post. Skicka med responskod.
-            $response = $emp->getSingleemp($id);
+            $response = $study->getSinglestud($id);
             http_response_code(200); // Lyckad request
         } else {
-            // Anropa metoden för att hämta alla poster. Skicka med responskod.
-            $response = $emp->getEmp();
+            // Anropa metoden för att hämta alla studie-poster. Skicka med responskod.
+            $response = $study->getStud();
             http_response_code(200); // Lyckad request
         }
 
@@ -50,25 +50,25 @@ switch ($method) {
         // Kontrollera att $data ej är tom, annars skicka felmeddelande
         if ($data != "") {
             // Bryt ut de olika delarna från medskickad data och lagra som sträng-variabler
-            $emptitle = strval($data->{'emptitle'});
-            $empplace = strval($data->{'empplace'});
-            $empstartdate = strval($data->{'empstartdate'});
-            $empenddate = strval($data->{'empenddate'});
+            $studtitle = strval($data->{'studtitle'});
+            $university = strval($data->{'university'});
+            $studstartdate = strval($data->{'studstartdate'});
+            $studenddate = strval($data->{'studenddate'});
 
             // Anropa metoden för att lagra medskickad data i databasen, kontrollera om anropet lyckas
-            if ($emp->createEmp($emptitle, $empplace, $empstartdate, $empenddate)) {
+            if ($study->createStud($studtitle, $university, $studstartdate, $studenddate)) {
                 // Returnera responskod
                 http_response_code(201); //Created
-                $response = array("message" => "Ny jobbpost skapad");
+                $response = array("message" => "Ny studiepost skapad");
             } else { // Vid misslyckat anrop
                 // Returnera responskod
                 http_response_code(500); // Fel på serversidan
-                $response = array("message" => "Fel vid anrop. Jobbpost kunde inte skapas. Kontrollera medskickad data och försök igen.");
+                $response = array("message" => "Fel vid anrop. Studiepost kunde inte skapas. Kontrollera medskickad data och försök igen.");
             }
         } else {
             // Returnera responskod
             http_response_code(400); // Bad Request - The server could not understand the request due to invalid syntax.
-            $response = array("message" => "Fel vid anrop. Jobbpost kunde inte skickas. Kontrollera medskickad data och försök igen.");
+            $response = array("message" => "Fel vid anrop. Studiepost kunde inte skickas. Kontrollera medskickad data och försök igen.");
         }
 
         break;
@@ -88,21 +88,21 @@ switch ($method) {
             if ($data != "") {
 
                 // Bryt ut de olika delarna från medskickad data och lagra som variabler med rätt typ
-                $empID = intval($id);
-                $emptitle = strval($data->{'emptitle'});
-                $empplace = strval($data->{'empplace'});
-                $empstartdate = strval($data->{'empstartdate'});
-                $empenddate = strval($data->{'empenddate'});
+                $studID = intval($id);
+                $studtitle = strval($data->{'studtitle'});
+                $university = strval($data->{'university'});
+                $studstartdate = strval($data->{'studstartdate'});
+                $studenddate = strval($data->{'studenddate'});
 
                 // Anropa metoden för att uppdatera medskickad data i databasen, kontrollera om anropet lyckas
-                if ($emp->changeEmp($empID, $emptitle, $empplace, $empstartdate, $empenddate)) {
+                if ($study->changeStud($studID, $studtitle, $university, $studstartdate, $studenddate)) {
                     // Returnera responskod
                     http_response_code(200); // Lyckad förfrågan
-                    $response = array("message" => "Jobbposten är uppdaterad");
+                    $response = array("message" => "Studieposten är uppdaterad");
                 } else { // Vid misslyckat anrop
                     // Returnera responskod
                     http_response_code(500); // Fel på serversidan
-                    $response = array("message" => "Fel vid anrop. Jobbpost kunde inte uppdateras i databasen. Kontrollera medskickad data och försök igen.");
+                    $response = array("message" => "Fel vid anrop. Studiepost kunde inte uppdateras i databasen. Kontrollera medskickad data och försök igen.");
                 }
 
             } else {
@@ -123,14 +123,14 @@ switch ($method) {
             $id = intval($id);
 
             // Anropa metoden för att radera post från databasen
-            if($emp->deleteEmp($id)) {
+            if($study->deleteStud($id)) {
                 // Ange lyckad status om anrop lyckades
                 http_response_code(200);
-                $response = array("message" => "Jobbposten med id $id raderades");
+                $response = array("message" => "Studieposten med id $id raderades");
             } else {
                 // Ange felmeddelande och statuskod om misslyckat anrop
                 http_response_code(500);
-                $response = array("message" => "Jobbposten kunde inte raderas från databasen");                
+                $response = array("message" => "Studieposten kunde inte raderas från databasen");                
             }
         }
         break;
