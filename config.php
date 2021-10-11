@@ -1,6 +1,6 @@
 <?php
 // Välj om utvecklingsläge är på eller av
-$devMode = true;
+$devMode = false;
 
 // Visa felmeddelanden om utvecklingsläge är på
 if($devMode) {
@@ -23,8 +23,8 @@ if($devMode) {
 
 } else {
     // Publika databasinställningar
-    define("DBHOST", "");
-    define("DBUSER", "");
-    define("DBPASS", "");
-    define("DBDATABASE", "");
+    define("DBHOST", "studentmysql.miun.se");
+    define("DBUSER", "sian2001");
+    define("DBPASS", "HrGrG7cmuC");
+    define("DBDATABASE", "sian2001");
 }
