@@ -44,43 +44,54 @@ switch ($method) {
 
         break;
     case 'POST':
-        // Läser in medskickad data, lagras som array
-        $data = $_POST;
 
-        // Kontrollera att bild är medskickad
-        if (isset($_FILES['siteimage'])) {
+        // Kontrollera att $_POST är medskickad
+        if (isset($_POST)) {
+            // Läser in medskickad data, lagras som array
+            $data = $_POST;
 
-            // Generera unikt namn för bilden
-            $imagename = uniqid() . ".png";
+            // Kontrollera att bild är medskickad
+            if (isset($_FILES['siteimage'])) {
 
-            // Läs in medskickad bild
-            $image = $_FILES['siteimage'];
+                // Generera unikt namn för bilden
+                $imagename = uniqid() . ".png";
 
-            // Flytta medskickad bild till katalogen bilder
-            move_uploaded_file($_FILES['siteimage']["tmp_name"], "uploads/" . $imagename);
+                // Läs in medskickad bild
+                $image = $_FILES['siteimage'];
 
-            // Lagra relativ url till bilden
-            $imageurl = "uploads/" . $imagename;
-        }
+                // Flytta medskickad bild till katalogen bilder
+                move_uploaded_file($_FILES['siteimage']["tmp_name"], "uploads/" . $imagename);
 
-        
-        // Kontrollera att $data ej är tom, annars skicka felmeddelande
-        if ($data != "") {
-            // Bryt ut de olika delarna från medskickad data och lagra som sträng-variabler
-            $sitetitle = strval($data['sitetitle']);
-            $siteurl = strval($data['siteurl']);
-            $sitedesc = strval($data['sitedesc']);
-            $siteimage = strval($imageurl);
+                // Lagra relativ url till bilden
+                $imageurl = "uploads/" . $imagename;
 
-            // Anropa metoden för att lagra medskickad data i databasen, kontrollera om anropet lyckas
-            if ($web->createSite($sitetitle, $siteurl, $sitedesc, $siteimage)) {
+                // Kontrollera att $data ej är tom, annars skicka felmeddelande
+                if ($data != "") {
+                    // Bryt ut de olika delarna från medskickad data och lagra som sträng-variabler
+                    $sitetitle = strval($data['sitetitle']);
+                    $siteurl = strval($data['siteurl']);
+                    $sitedesc = strval($data['sitedesc']);
+                    $siteimage = strval($imageurl);
+
+                    // Anropa metoden för att lagra medskickad data i databasen, kontrollera om anropet lyckas
+                    if ($web->createSite($sitetitle, $siteurl, $sitedesc, $siteimage)) {
+                        // Returnera responskod
+                        http_response_code(201); //Created
+                        $response = array("message" => "Ny webbsidepost skapad");
+                    } else { // Vid misslyckat anrop
+                        // Returnera responskod
+                        http_response_code(500); // Fel på serversidan
+                        $response = array("message" => "Fel vid anrop. webbsidepost kunde inte skapas. Kontrollera medskickad data och försök igen.");
+                    }
+                } else {
+                    // Returnera responskod
+                    http_response_code(400); // Bad Request - The server could not understand the request due to invalid syntax.
+                    $response = array("message" => "Fel vid anrop. Webbsidepost kunde inte skickas. Kontrollera medskickad data och försök igen.");
+                }
+            } else {
                 // Returnera responskod
-                http_response_code(201); //Created
-                $response = array("message" => "Ny webbsidepost skapad");
-            } else { // Vid misslyckat anrop
-                // Returnera responskod
-                http_response_code(500); // Fel på serversidan
-                $response = array("message" => "Fel vid anrop. webbsidepost kunde inte skapas. Kontrollera medskickad data och försök igen.");
+                http_response_code(400); // Bad Request - The server could not understand the request due to invalid syntax.
+                $response = array("message" => "Fel vid anrop. Webbsidepost kunde inte skickas. Kontrollera medskickad data och försök igen.");
             }
         } else {
             // Returnera responskod
@@ -152,7 +163,5 @@ switch ($method) {
         break;
 }
 
-if(isset($response)) {
 //Skickar svar tillbaka till avsändaren
 echo json_encode($response);
-}
