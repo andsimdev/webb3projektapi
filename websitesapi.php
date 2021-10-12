@@ -7,13 +7,13 @@ include("config.php");
 header('Access-Control-Allow-Origin: *');
 
 // Talar om att webbtjänsten skickar data i JSON-format
-//header('Content-Type: application/json');
+header('Content-Type: application/json');
 
 // Vilka metoder som webbtjänsten accepterar
 header('Access-Control-Allow-Methods: GET, PUT, POST, DELETE');
 
 // Vilka headers som är tillåtna vid anrop från klient-sidan, kan bli problem med CORS (Cross-Origin Resource Sharing) utan denna.
-//header('Access-Control-Allow-Headers: Access-Control-Allow-Headers, Content-Type, Access-Control-Allow-Methods, Authorization, X-Requested-With');
+header('Access-Control-Allow-Headers: Access-Control-Allow-Headers, Content-Type, Access-Control-Allow-Methods, Authorization, X-Requested-With');
 
 // Läser in vilken metod som skickats och lagrar i en variabel
 $method = $_SERVER['REQUEST_METHOD'];
@@ -148,6 +148,15 @@ switch ($method) {
         } else {
             // Säkerställ att medskickat id är numeriskt värde
             $id = intval($id);
+
+            // Hämta enskilda posten för att läsa ut bildsökväg
+            $single = $web->getSinglesite($id);
+
+            // Plocka ut sökvägen
+            $imageurl = $single[0]['siteimage'];
+
+            // Radera bilden med sökvägen
+            unlink($imageurl);
 
             // Anropa metoden för att radera post från databasen
             if ($web->deleteSite($id)) {
