@@ -7,13 +7,13 @@ include("config.php");
 header('Access-Control-Allow-Origin: *');
 
 // Talar om att webbtjänsten skickar data i JSON-format
-header('Content-Type: application/json');
+//header('Content-Type: application/json');
 
 // Vilka metoder som webbtjänsten accepterar
 header('Access-Control-Allow-Methods: GET, PUT, POST, DELETE');
 
 // Vilka headers som är tillåtna vid anrop från klient-sidan, kan bli problem med CORS (Cross-Origin Resource Sharing) utan denna.
-header('Access-Control-Allow-Headers: Access-Control-Allow-Headers, Content-Type, Access-Control-Allow-Methods, Authorization, X-Requested-With');
+//header('Access-Control-Allow-Headers: Access-Control-Allow-Headers, Content-Type, Access-Control-Allow-Methods, Authorization, X-Requested-With');
 
 // Läser in vilken metod som skickats och lagrar i en variabel
 $method = $_SERVER['REQUEST_METHOD'];
@@ -32,7 +32,7 @@ switch ($method) {
         // Kontrollera om id skickats med för att hämta specifik post
         if (isset($id)) {
             // Säkerställ att medskickat id är numeriskt värde
-            $id = intval($id);            
+            $id = intval($id);
             // Anropa metoden för att hämta enskild post. Skicka med responskod.
             $response = $web->getSinglesite($id);
             http_response_code(200); // Lyckad request
@@ -44,16 +44,33 @@ switch ($method) {
 
         break;
     case 'POST':
-        // Läser in JSON-data skickad med anropet och omvandlar till ett objekt.
-        $data = json_decode(file_get_contents("php://input"));
+        // Läser in medskickad data, lagras som array
+        $data = $_POST;
 
+        // Kontrollera att bild är medskickad
+        if (isset($_FILES['siteimage'])) {
+
+            // Generera unikt namn för bilden
+            $imagename = uniqid() . ".png";
+
+            // Läs in medskickad bild
+            $image = $_FILES['siteimage'];
+
+            // Flytta medskickad bild till katalogen bilder
+            move_uploaded_file($_FILES['siteimage']["tmp_name"], "uploads/" . $imagename);
+
+            // Lagra relativ url till bilden
+            $imageurl = "uploads/" . $imagename;
+        }
+
+        
         // Kontrollera att $data ej är tom, annars skicka felmeddelande
         if ($data != "") {
             // Bryt ut de olika delarna från medskickad data och lagra som sträng-variabler
-            $sitetitle = strval($data->{'sitetitle'});
-            $siteurl = strval($data->{'siteurl'});
-            $sitedesc = strval($data->{'sitedesc'});
-            $siteimage = strval($data->{'siteimage'});
+            $sitetitle = strval($data['sitetitle']);
+            $siteurl = strval($data['siteurl']);
+            $sitedesc = strval($data['sitedesc']);
+            $siteimage = strval($imageurl);
 
             // Anropa metoden för att lagra medskickad data i databasen, kontrollera om anropet lyckas
             if ($web->createSite($sitetitle, $siteurl, $sitedesc, $siteimage)) {
@@ -104,7 +121,6 @@ switch ($method) {
                     http_response_code(500); // Fel på serversidan
                     $response = array("message" => "Fel vid anrop. Webbsidepost kunde inte uppdateras i databasen. Kontrollera medskickad data och försök igen.");
                 }
-
             } else {
                 // Skicka felmeddelande och statuskod att data saknas
                 http_response_code(400); //Bad Request - The server could not understand the request due to invalid syntax.
@@ -123,18 +139,20 @@ switch ($method) {
             $id = intval($id);
 
             // Anropa metoden för att radera post från databasen
-            if($web->deleteSite($id)) {
+            if ($web->deleteSite($id)) {
                 // Ange lyckad status om anrop lyckades
                 http_response_code(200);
                 $response = array("message" => "Webbsideposten med id $id raderades");
             } else {
                 // Ange felmeddelande och statuskod om misslyckat anrop
                 http_response_code(500);
-                $response = array("message" => "Webbsideposten kunde inte raderas från databasen");                
+                $response = array("message" => "Webbsideposten kunde inte raderas från databasen");
             }
         }
         break;
 }
 
+if(isset($response)) {
 //Skickar svar tillbaka till avsändaren
 echo json_encode($response);
+}
