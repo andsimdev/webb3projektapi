@@ -1,6 +1,6 @@
 <?php
 // Välj om utvecklingsläge är på eller av
-$devMode = true;
+$devMode = false;
 
 // Visa felmeddelanden om utvecklingsläge är på
 if($devMode) {
